@@ -9,8 +9,12 @@ Run the script in a folder with a file named `endpoints.json`
     "GET": {
         "endpoint_name": {
             "query_params": [],
-            "header": {}
-         }
+            "header": {"Content-Type": "application/json"},
+            "response": {
+                "content": {"message": "Hello AutoAPI"},
+                "file": false
+            }
+        },
     },
     "POST": {
         "endpoint_name": { 
@@ -37,3 +41,9 @@ Run the script in a folder with a file named `endpoints.json`
 ```
 
 ## Running the script
+
+Define your `endpoints.json` file. For now we only support `GET` requests.
+
+Make the file executable. On linux it would be `chmod +x autoapi`
+
+Then run it. `./autoapi`
