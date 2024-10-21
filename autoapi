@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'sinatra'
+
+# Get the file and parse the entire file into a ruby hash
+file = File.read("#{Dir.pwd}/endpoints.json")
+endpoints_hash = JSON.parse(file)
+
+# Build endpoints
+# has a couple important parts
+    # headers
+    # body
+    # query params
+    # method
+    # endpoint name
+
+# Build endpoints dynamically :) Hello Meta Programming
+# This takes in a method name, the name of the endpoint and a block that sinatra understands.
+def create_endpoint(method, name, &block)
+  Sinatra::Application.instance_eval do
+    name = "/#{name}" if not name.start_with?(/\//)
+    send(method, name, &block)
+  end
+end
+
+endpoints_hash.each do |method, paths|
+  paths.each do |path, params|
+    create_endpoint(method.downcase.to_s, "#{path.to_s}") do
+      content_type :json if params["Content-Type"] == "application/json"
+      content_type :html if params["Content-type"] == "text/html"
+      if params["response"]["file"]
+        send_file "#{Dir.pwd}/#{params["response"]["content"]}"
+      else
+        params["response"]["content"].to_json 
+      end
+    end
+  end
+end
+
+

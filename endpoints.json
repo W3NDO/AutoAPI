@@ -1,0 +1,50 @@
+{
+    "GET": {
+        "json_response": {
+            "query_params": [],
+            "header": {"Content-Type": "application/json"},
+            "response": {
+                "content": {"message": "Hello AutoAPI"},
+                "file": false
+            }
+        },
+        "json_response_file": {
+            "query_params": [],
+            "header": {"Content-Type": "application/json"},
+            "response": {
+                "file": true,
+                "content": "endpoints.json"
+            }
+        },
+        "html_file": {
+            "query_params": [],
+            "header": {"Content-Type": "text/html"},
+            "response": {
+                "file": true,
+                "content": "test.html"
+            }
+        }
+
+    },
+    "POST": {
+        "endpoint_name": { 
+            "header": {},
+            "body": {},
+            "query_params": {}
+        }
+    },
+    "PUT": {
+        "endpoint_name": { 
+            "header": {},
+            "body": {},
+            "query_params": {}
+        }
+    },
+    "DELETE": {
+        "endpoint_name": { 
+            "header": {},
+            "body": {},
+            "query_params": {}
+        }
+    }
+}
