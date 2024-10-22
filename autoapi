@@ -1,11 +1,33 @@
 #!/usr/bin/env ruby
 
 require 'json'
+require 'yaml'
 require 'sinatra'
 
 # Get the file and parse the entire file into a ruby hash
-file = File.read("#{Dir.pwd}/endpoints.json")
-endpoints_hash = JSON.parse(file)
+json = JSON.load_file("#{Dir.pwd}/endpoints.json") if File.exist?("#{Dir.pwd}/endpoints.json")
+yaml = YAML.load_file("#{Dir.pwd}/openapi_spec.yaml") if File.exist?("#{Dir.pwd}/openapi_spec.yaml")
+source_filetype = nil
+
+def choose_file(json_file, yaml_file)
+  puts "Found both a endpoints.json file and an openapi_spec.yaml file. Choose the one to be used. \n1. endpoints.json\n2. openapi_spec.yaml. \nChoose 1 or 2:"
+
+  choice = gets.chomp
+  case choice
+  when "1"
+    return json_file, :json
+  when "2"
+    return yaml_file, :yaml
+  else
+    puts "Invalid Choice. Exiting!"
+    exit(1)
+  end
+end
+if yaml and json
+  endpoints_hash, source_filetype = choose_file(json, yaml)
+end
+
+# endpoints_hash = JSON.parse(file)
 
 # Build endpoints
 # has a couple important parts
@@ -24,18 +46,36 @@ def create_endpoint(method, name, &block)
   end
 end
 
-endpoints_hash.each do |method, paths|
-  paths.each do |path, params|
-    create_endpoint(method.downcase.to_s, "#{path.to_s}") do
-      content_type :json if params["Content-Type"] == "application/json"
-      content_type :html if params["Content-type"] == "text/html"
-      if params["response"]["file"]
-        send_file "#{Dir.pwd}/#{params["response"]["content"]}"
-      else
-        params["response"]["content"].to_json 
+case source_filetype
+when :json
+  endpoints_hash.each do |method, paths|
+    paths.each do |path, params|
+      create_endpoint(method.downcase.to_s, "#{path.to_s}") do
+        content_type :json if params["Content-Type"] == "application/json"
+        content_type :html if params["Content-type"] == "text/html"
+        if params["response"]["file"]
+          send_file "#{Dir.pwd}/#{params["response"]["content"]}"
+        else
+          params["response"]["content"].to_json 
+        end
       end
     end
   end
+when :yaml
+  paths = endpoints_hash["paths"]
+  paths.each do |pathname, method|
+    method.each do # there may be more than 1 method. 
+      final_pathname = pathname.gsub(/\{(\w+)\}/, ':\1' )
+      method = nil
+  
+      method = "get" if paths[pathname].has_key? "get"
+      method = "post" if paths[pathname].has_key? "post"
+      method = "put" if paths[pathname].has_key? "put"
+      method = "delete" if paths[pathname].has_key? "delete"
+  
+      pp final_pathname
+    end
+    
+  end
 end
-
 
