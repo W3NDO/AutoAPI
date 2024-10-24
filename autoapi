@@ -64,16 +64,11 @@ when :json
 when :yaml
   paths = endpoints_hash["paths"]
   paths.each do |pathname, method|
-    method.each do # there may be more than 1 method. 
-      final_pathname = pathname.gsub(/\{(\w+)\}/, ':\1' )
-      method = nil
-  
-      method = "get" if paths[pathname].has_key? "get"
-      method = "post" if paths[pathname].has_key? "post"
-      method = "put" if paths[pathname].has_key? "put"
-      method = "delete" if paths[pathname].has_key? "delete"
-  
-      pp final_pathname
+    methods = []
+    methods = %w[get post put delete].select { |method| paths[pathname].key?(method) }
+    methods.each do |method| # there may be more than 1 method. 
+      final_pathname = pathname.gsub(/\{(\w+)\}/, ':\1' )  
+      pp [final_pathname, method]
     end
     
   end
